@@ -1,0 +1,75 @@
+version: '3'
+services:
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airflow-webserver
+    restart: always
+    env_file:
+      - build_airflow/.env.airflow
+    ports:
+      - 127.0.0.1:8001:8080
+    networks:
+      - airflow
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+      - ./logs:/usr/local/airflow/logs
+      - ./plugins:/usr/local/airflow/plugins
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: "6G"
+        reservations:
+          cpus: "2"
+          memory: "4G"
+    logging:
+      options:
+          max-size: 10m
+          max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    env_file:
+      - build_airflow/.env.postgres_db
+    ports:
+      - 127.0.0.1:5432:5432
+    restart: always
+    networks:
+      - airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "4G"
+        reservations:
+          cpus: "1"
+          memory: "2G"
+    logging:
+      options:
+          max-size: 10m
+          max-file: "3"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow", "-d", "airflow"]
+      interval: "10s"
+      retries: 5
+
+volumes:
+  postgres-db-volume:
+
+networks:
+  airflow:
+    name: aa_airflow
