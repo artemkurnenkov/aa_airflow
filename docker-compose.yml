@@ -17,6 +17,7 @@ services:
       - ./dags:/usr/local/airflow/dags
       - ./logs:/usr/local/airflow/logs
       - ./plugins:/usr/local/airflow/plugins
+      - ./build_airflow/config/airflow.cfg:/usr/local/airflow/airflow.cfg
     deploy:
       resources:
         limits:

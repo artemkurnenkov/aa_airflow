@@ -68,7 +68,10 @@ RUN set -ex \
 
 COPY build_airflow/build_script/entrypoint.sh /entrypoint.sh
 COPY build_airflow/req.airflow.txt ${AIRFLOW_USER_HOME}/req.airflow.txt
+COPY build_airflow/config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 
 WORKDIR ${AIRFLOW_USER_HOME}
+
+RUN pip install --no-cache -r ${AIRFLOW_USER_HOME}/req.airflow.txt
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["webserver"]
